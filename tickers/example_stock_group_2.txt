@@ -1,0 +1,10 @@
+SQ
+RDFN
+YHOO
+NFLX
+C
+FB
+TSLA
+SSYS
+WDAY
+index/SPX

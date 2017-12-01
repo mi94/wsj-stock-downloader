@@ -1,0 +1,6 @@
+index/JP/NIK
+index/DJIA
+index/COMP
+AAPL
+GOOG
+AMZN
