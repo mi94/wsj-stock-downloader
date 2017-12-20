@@ -20,7 +20,7 @@ def rolling_returns_helper(start_date, end_date, group, file_name):
 
     close = df_dates['Adj Close']
     last_index = len(close) - 1
-    returns = (close - close[last_index])/close[last_index] + 1
+    returns = close/close[last_index]
     returns[-1] = 1.0
 
     group_dict.update({ticker: returns.dropna().to_dict()})
@@ -41,7 +41,7 @@ def daily_returns_helper(start_date, end_date, group, file_name):
 
     if len(ticker_df_dates) > 0:
         close = ticker_df_dates['Close']
-        returns = (close - close.shift(-1))/close.shift(-1)
+        returns = close/close.shift(-1) - 1
         returns[-1] = 0.0
         group_dict.update({ticker: returns.to_dict()})
     return group_dict
