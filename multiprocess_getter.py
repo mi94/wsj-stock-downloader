@@ -40,7 +40,7 @@ def get_urls_and_paths():
             # For each line (stock), create the GET URL and store the save location.
             for line in input_file.read().splitlines():
                 urls_and_paths.append((
-                    'http://quotes.wsj.com/' + line + '/historical-prices/download?num_rows=100000000000000&range_days=100000000000000&startDate=01/01/1970&endDate=01/01/2040',
+                    'https:/www.wsj.com/market-data/quotes/' + line + '/historical-prices/download?num_rows=100000000000000&range_days=100000000000000&startDate=01/01/1970&endDate=01/01/2040',
                     'data/' + group + '/' + line.split('/')[-1] + '.csv'
                 ))
 
