@@ -1,3 +1,4 @@
 data
 returns
 __pycache__
+.DS_Store

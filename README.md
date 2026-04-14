@@ -23,14 +23,32 @@ Example URL shape:
 
 `git clone git@github.com:mi94/wsj-stock-downloader.git`
 
-### Create list of tickers to download data for
-In the `tickers` folder, add as many text files as desired to split your stocks into groups (e.g. separate portfolios). Each text file will have a line-delimited list of tickers. Make sure to take the ticker AND any prefixes (examples shown with indexes and foreign indexes) from the URL on WSJ (e.g. http://quotes.wsj.com/index/SPX would be `index/SPX`).
+### Create ticker lists
+In the `tickers` folder, add as many text files as desired. Each file is a **ticker list** — a named collection of tickers that will be downloaded and processed together. Each text file contains a line-delimited list of tickers.
+
+Ticker lists are purely an organizational convenience: they control how raw data is grouped into subfolders and how per-list returns CSVs are named. There is no portfolio math applied at the list level — no weighting, no aggregation. If you only want one bucket, one file is fine. If you want to keep indexes, domestic equities, and foreign stocks in separate outputs, use separate files.
+
+Make sure to take the ticker AND any prefixes (examples shown with indexes and foreign indexes) from the URL on WSJ (e.g. http://quotes.wsj.com/index/SPX would be `index/SPX`).
 
 ### Running the program
-Navigate to the directory and run `python multiprocess_getter.py`.
+Navigate to the directory and run:
+
+```
+python download.py
+```
+
+The returns date range defaults to `2000-01-01` through today, and the returns type defaults to `daily`. All three can be overridden:
+
+```
+python download.py --start-date 2010-01-01 --end-date 2023-12-31 --returns-type cumulative
+```
+
+`--returns-type daily` (default): each value is the day-over-day percentage change.
+
+`--returns-type cumulative`: each value is the price expressed as a multiple of the starting price — i.e. growth from `--start-date`. The oldest date in the range is always 1.0.
 
 ### Data directory
-A `data` directory will be created and will be populated with raw data for each ticker. Each group will have its own folder.
+A `data` directory will be created and populated with raw data for each ticker, organized into one subfolder per ticker list.
 
 ### Returns directory
-A `returns` directory will be created and will be populated with each group's returns. Each group will have its own CSV file, where each column was a ticker in the group `.txt` file. There will also be a CSV of all of the individual CSV's merged into one, named `all.csv`.
+A `returns` directory will be created and populated with one CSV per ticker list, where each column is a ticker from that list. A combined `all.csv` is also written, merging all ticker lists into one.
