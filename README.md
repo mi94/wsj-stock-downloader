@@ -4,6 +4,19 @@
 
 This is a Python 3 script that downloads all available historical data for a given list of tickers and then processes returns for a desired date set.
 
+### Current status
+The original workflow assumed that the WSJ historical-prices download URL behaved like a plain CSV endpoint for scripted clients. That no longer appears to be true.
+
+As of April 13, 2026:
+
+- Opening a download URL in the browser can still work interactively.
+- Direct scripted requests from tools like Python `urllib`, `curl`, and headless Chromium can return a WSJ bot-check or challenge response instead of CSV data.
+- Because of that, this repository should currently be treated as a historical snapshot of the old approach rather than a verified working downloader.
+
+Example URL shape:
+
+`https://www.wsj.com/market-data/quotes/AAPL/historical-prices/download?num_rows=100000000000000&range_days=100000000000000&startDate=01/01/1970&endDate=01/01/2040`
+
 ## Usage
 
 ### Clone the repository
