@@ -1,4 +1,5 @@
 # wsj-stock-downloader
+<!-- test: validate Claude Code PR flow -->
 
 ## Basic Information
 
