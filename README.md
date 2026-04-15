@@ -1,54 +1,94 @@
 # wsj-stock-downloader
 
-## Basic Information
+Small Python library and CLI for downloading WSJ historical CSVs and computing returns.
 
-This is a Python 3 script that downloads all available historical data for a given list of tickers and then processes returns for a desired date set.
+## Current status
 
-### Current status
-The original workflow assumed that the WSJ historical-prices download URL behaved like a plain CSV endpoint for scripted clients. That no longer appears to be true.
-
-As of April 13, 2026:
-
-- Opening a download URL in the browser can still work interactively.
-- Direct scripted requests from tools like Python `urllib`, `curl`, and headless Chromium can return a WSJ bot-check or challenge response instead of CSV data.
-- Because of that, this repository should currently be treated as a historical snapshot of the old approach rather than a verified working downloader.
+The WSJ download endpoint is no longer reliably scriptable because it can return bot-check responses instead of CSV data. This repository now treats the downloader as a thin, replaceable client and keeps the returns-processing code usable as a standalone library.
 
 Example URL shape:
 
 `https://www.wsj.com/market-data/quotes/AAPL/historical-prices/download?num_rows=100000000000000&range_days=100000000000000&startDate=01/01/1970&endDate=01/01/2040`
 
-## Usage
+## Quick start
 
-### Clone the repository
-
-`git clone git@github.com:mi94/wsj-stock-downloader.git`
-
-### Create ticker lists
-In the `tickers` folder, add as many text files as desired. Each file is a **ticker list** — a named collection of tickers that will be downloaded and processed together. Each text file contains a line-delimited list of tickers.
-
-Ticker lists are purely an organizational convenience: they control how raw data is grouped into subfolders and how per-list returns CSVs are named. There is no portfolio math applied at the list level — no weighting, no aggregation. If you only want one bucket, one file is fine. If you want to keep indexes, domestic equities, and foreign stocks in separate outputs, use separate files.
-
-Make sure to take the ticker AND any prefixes (examples shown with indexes and foreign indexes) from the URL on WSJ (e.g. http://quotes.wsj.com/index/SPX would be `index/SPX`).
-
-### Running the program
-Navigate to the directory and run:
-
-```
-python download.py
+```bash
+git clone git@github.com:mi94/wsj-stock-downloader.git
+cd wsj-stock-downloader
+python -m venv .venv
+. .venv/bin/activate
+pip install -e .
 ```
 
-The returns date range defaults to `2000-01-01` through today, and the returns type defaults to `daily`. All three can be overridden:
+Create one or more line-delimited ticker-list files inside `tickers/`. The file name becomes the output group name.
 
+Example:
+
+```text
+# tickers/example.txt
+AAPL
+MSFT
+index/SPX
 ```
-python download.py --start-date 2010-01-01 --end-date 2023-12-31 --returns-type cumulative
+
+Run the CLI:
+
+```bash
+wsj-stock-downloader --start-date 2010-01-01 --end-date 2023-12-31
 ```
 
-`--returns-type daily` (default): each value is the day-over-day percentage change.
+If the installed script is not on your shell `PATH`, use:
 
-`--returns-type cumulative`: each value is the price expressed as a multiple of the starting price — i.e. growth from `--start-date`. The oldest date in the range is always 1.0.
+```bash
+python -m wsj_stock_downloader.cli --start-date 2010-01-01 --end-date 2023-12-31
+```
 
-### Data directory
-A `data` directory will be created and populated with raw data for each ticker, organized into one subfolder per ticker list.
+By default the tool:
 
-### Returns directory
-A `returns` directory will be created and populated with one CSV per ticker list, where each column is a ticker from that list. A combined `all.csv` is also written, merging all ticker lists into one.
+- reads ticker lists from `tickers/`
+- writes raw CSVs to `data/`
+- writes returns CSVs to `returns/`
+- leaves existing directories in place unless `--clean` is provided
+
+## Library usage
+
+```python
+from pathlib import Path
+
+from wsj_stock_downloader import run_pipeline
+
+result = run_pipeline(
+    tickers_dir=Path("tickers"),
+    data_dir=Path("data"),
+    returns_dir=Path("returns"),
+    start_date="2010-01-01",
+    end_date="2023-12-31",
+    returns_type="daily",
+    workers=8,
+    clean=False,
+)
+
+print(result)
+```
+
+If you already have CSV files on disk and only want returns processing:
+
+```python
+from pathlib import Path
+
+from wsj_stock_downloader import compute_returns_for_directory
+
+frame = compute_returns_for_directory(
+    data_dir=Path("data/example"),
+    start_date="2010-01-01",
+    end_date="2023-12-31",
+    returns_type="cumulative",
+)
+```
+
+## Notes
+
+- Ticker list files are just organizational buckets. There is no portfolio weighting or aggregation logic per list.
+- Symbols that include `/` are stored with `__` in local filenames to avoid collisions and nested path issues.
+- `--returns-type daily` computes close-to-close percentage change.
+- `--returns-type cumulative` computes price growth relative to the first value in the selected date range.
