@@ -86,6 +86,37 @@ frame = compute_returns_for_directory(
 )
 ```
 
+If you want to split the workflow up yourself, the package also exposes a few focused entry points:
+
+```python
+from pathlib import Path
+
+from wsj_stock_downloader import (
+    download_ticker_lists,
+    load_ticker_lists,
+    write_returns_outputs,
+)
+
+ticker_lists = load_ticker_lists(Path("tickers"))
+download_results = download_ticker_lists(ticker_lists, data_dir=Path("data"), workers=4)
+written_files = write_returns_outputs(
+    data_dir=Path("data"),
+    returns_dir=Path("returns"),
+    start_date="2010-01-01",
+    end_date="2023-12-31",
+)
+```
+
+## Running tests
+
+The test suite uses Python's built-in `unittest` runner, so there is no extra test dependency to install.
+
+After installing the package dependencies, run:
+
+```bash
+python -m unittest discover -s tests
+```
+
 ## Notes
 
 - Ticker list files are just organizational buckets. There is no portfolio weighting or aggregation logic per list.

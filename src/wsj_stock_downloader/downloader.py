@@ -71,3 +71,17 @@ def download_all(tasks: list[DownloadTask], workers: int = 8) -> list[DownloadRe
     max_workers = max(1, min(workers, len(tasks)))
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         return list(executor.map(download_one, tasks))
+
+
+def download_ticker_lists(
+    ticker_lists: dict[str, list[str]],
+    data_dir: Path,
+    workers: int = 8,
+) -> list[DownloadResult]:
+    """Download CSVs for the provided ticker lists into ``data_dir``.
+
+    This is the reusable library-level entry point for callers who want to
+    control ticker discovery themselves without running the full pipeline.
+    """
+    tasks = plan_downloads(ticker_lists, data_dir)
+    return download_all(tasks, workers=workers)

@@ -6,7 +6,7 @@ import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
-from .downloader import download_all, plan_downloads
+from .downloader import download_ticker_lists
 from .returns import write_returns_outputs
 from .tickers import load_ticker_lists
 
@@ -43,8 +43,7 @@ def run_pipeline(
         returns_dir.mkdir(parents=True, exist_ok=True)
 
     ticker_lists = load_ticker_lists(tickers_dir)
-    tasks = plan_downloads(ticker_lists, data_dir)
-    download_results = download_all(tasks, workers=workers)
+    download_results = download_ticker_lists(ticker_lists, data_dir, workers=workers)
     written_files = write_returns_outputs(
         data_dir=data_dir,
         returns_dir=returns_dir,
